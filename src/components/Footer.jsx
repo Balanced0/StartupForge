@@ -24,8 +24,14 @@ const quickLinks = [
 
 const socialLinks = [
   { icon: <XIcon />, href: "#" },
-  { icon: <LogoLinkedin className="h-4 w-4" />, href: "#" },
-  { icon: <LogoGithub className="h-4 w-4" />, href: "#" },
+  {
+    icon: <LogoLinkedin className="h-4 w-4" />,
+    href: "https://www.linkedin.com/in/md-alvi-chowdhury/",
+  },
+  {
+    icon: <LogoGithub className="h-4 w-4" />,
+    href: "https://github.com/Balanced0",
+  },
   { icon: <Globe className="h-4 w-4" />, href: "#" },
 ];
 
