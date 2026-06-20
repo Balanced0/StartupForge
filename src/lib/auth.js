@@ -22,6 +22,10 @@ export const auth = betterAuth({
         type: "string", 
         defaultValue: "collaborator",
       },
+      isBlocked: {
+        type: "boolean",
+        defaultValue: false,
+      }
     },
   },
   database: mongodbAdapter(db, {
