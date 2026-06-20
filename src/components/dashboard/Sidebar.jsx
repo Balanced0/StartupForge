@@ -14,6 +14,7 @@ import {
   Persons,
   CircleDollar,
   ArrowRightFromSquare,
+  Xmark,
 } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 
@@ -83,7 +84,7 @@ const NAV_BY_ROLE = {
   ],
 };
 
-export default function Sidebar() {
+export default function Sidebar({ open, onClose }) {
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
@@ -96,93 +97,115 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-72 flex-col border-r border-white/10 bg-[#0a0a12] px-5 py-6">
-      {/* Logo */}
-      <Link href="/" className="flex items-center gap-3 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
-          <Rocket className="h-5 w-5" />
-        </div>
-        <span className="text-xl font-bold tracking-tight text-white">
-          StartupForge
-        </span>
-      </Link>
-
-      <div className="my-6 h-px bg-white/10" />
-
-      {/* Nav links */}
-      {isPending ? (
-        <div className="flex flex-col gap-2 px-2">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-12 animate-pulse rounded-2xl bg-white/5"
-            />
-          ))}
-        </div>
-      ) : (
-        <nav className="flex flex-col gap-2">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const normalizedPath = pathname?.replace(/\/$/, "") || "";
-            const normalizedHref = link.href.replace(/\/$/, "");
-
-            const active =
-              normalizedPath === normalizedHref ||
-              normalizedPath.startsWith(normalizedHref + "/");
-
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 font-semibold transition ${
-                  active
-                    ? "bg-primary text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+    <>
+      {/* Mobile overlay */}
+      {open && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        />
       )}
 
-      {/* Spacer pushes profile to bottom */}
-      <div className="flex-1" />
-
-      {/* Profile + sign out */}
-      {user && (
-        <div className="border-t border-white/10 pt-5">
-          <div className="flex items-center gap-3 px-2">
-            {user.image ? (
-              <img
-                src={user.image}
-                alt={user.name}
-                className="h-11 w-11 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/20 font-bold text-primary">
-                {user.name?.charAt(0).toUpperCase() || "U"}
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="truncate font-bold text-white text-sm">
-                {user.name}
-              </p>
-              <p className="text-sm capitalize text-white/40">{user.role}</p>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-white/10 bg-[#0a0a12] px-5 py-6 transition-transform duration-300 lg:static lg:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Logo + close button (mobile) */}
+        <div className="flex items-center justify-between px-2">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
+              <Rocket className="h-5 w-5" />
             </div>
-          </div>
+            <span className="text-xl font-bold tracking-tight text-white">
+              StartupForge
+            </span>
+          </Link>
 
           <button
-            onClick={handleLogout}
-            className="mt-4 flex w-full items-center gap-3 rounded-2xl px-4 py-3 font-semibold text-white/50 transition hover:bg-red-500/10 hover:text-red-400"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-white/60 hover:bg-white/5 lg:hidden"
           >
-            <ArrowRightFromSquare className="h-5 w-5" />
-            Sign Out
+            <Xmark className="h-5 w-5" />
           </button>
         </div>
-      )}
-    </aside>
+
+        <div className="my-6 h-px bg-white/10" />
+
+        {/* Nav links */}
+        {isPending ? (
+          <div className="flex flex-col gap-2 px-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-12 animate-pulse rounded-2xl bg-white/5"
+              />
+            ))}
+          </div>
+        ) : (
+          <nav className="flex flex-col gap-2">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const normalizedPath = pathname?.replace(/\/$/, "") || "";
+              const normalizedHref = link.href.replace(/\/$/, "");
+              const active =
+                normalizedPath === normalizedHref ||
+                normalizedPath.startsWith(normalizedHref + "/");
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 font-semibold transition ${
+                    active
+                      ? "bg-primary text-white"
+                      : "text-white/60 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Profile + sign out */}
+        {user && (
+          <div className="border-t border-white/10 pt-5">
+            <div className="flex items-center gap-3 px-2">
+              {user.image ? (
+                <img
+                  src={user.image}
+                  alt={user.name}
+                  className="h-11 w-11 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/20 font-bold text-primary">
+                  {user.name?.charAt(0).toUpperCase() || "U"}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate font-bold text-white text-sm">
+                  {user.name}
+                </p>
+                <p className="text-sm capitalize text-white/40">{user.role}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="mt-4 flex w-full items-center gap-3 rounded-2xl px-4 py-3 font-semibold text-white/50 transition hover:bg-red-500/10 hover:text-red-400"
+            >
+              <ArrowRightFromSquare className="h-5 w-5" />
+              Sign Out
+            </button>
+          </div>
+        )}
+      </aside>
+    </>
   );
 }
