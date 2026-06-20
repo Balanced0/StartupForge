@@ -44,7 +44,7 @@ export default function Navbar() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-5">
             <Link
-              href="/login"
+              href="/signin"
               className="font-medium text-base-content/70 transition-colors hover:text-primary"
             >
               Login
@@ -93,7 +93,7 @@ export default function Navbar() {
               <div className="my-2 h-px bg-base-200" />
 
               <Link
-                href="/login"
+                href="/signin"
                 onClick={() => setOpen(false)}
                 className="rounded-xl px-4 py-3 font-medium text-base-content/80 transition hover:bg-base-200"
               >

@@ -10,6 +10,7 @@ import {
   ArrowUpFromSquare,
   Check,
 } from "@gravity-ui/icons";
+import { authClient } from "@/lib/auth-client";
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -38,7 +39,7 @@ const PASSWORD_RULES = [
   { label: "One lowercase letter", test: (pw) => /[a-z]/.test(pw) },
 ];
 
-const IMGBB_API_KEY = process.env.PUBLIC_IMGBB_API_KEY;
+const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState("");
@@ -49,6 +50,7 @@ export default function SignupPage() {
   const [photoUrl, setPhotoUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const passwordValid = PASSWORD_RULES.every((rule) => rule.test(password));
 
@@ -86,14 +88,48 @@ export default function SignupPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!passwordValid) {
-      setError("Password doesn't meet the requirements");
+    setError("");
+
+    if (!fullName || !email || !password) {
+      setError("Please fill in all fields.");
       return;
     }
-    setError("");
-    // submit logic here
+    if (!passwordValid) {
+      setError("Password doesn't meet the requirements.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await authClient.signUp.email({
+        name: fullName,
+        email,
+        password,
+        image: photoUrl,
+        role,
+        callbackURL: "/",
+      });
+    } catch (err) {
+      setError(err?.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (err) {
+      setError(
+        err?.message || "Failed to sign in with Google. Please try again.",
+      );
+    }
   };
 
   return (
@@ -119,6 +155,7 @@ export default function SignupPage() {
       <div className="mt-8 w-full max-w-md rounded-3xl border border-base-200 bg-base-100 p-7 shadow-sm">
         <button
           type="button"
+          onClick={handleGoogleSubmit}
           className="flex w-full items-center justify-center gap-3 rounded-2xl border border-base-300 px-5 py-3.5 font-medium text-base-content transition hover:bg-base-200"
         >
           <GoogleIcon />
