@@ -1,0 +1,320 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import {
+  Rocket,
+  Persons,
+  Eye,
+  EyeSlash,
+  ArrowUpFromSquare,
+  Check,
+} from "@gravity-ui/icons";
+
+const GoogleIcon = () => (
+  <svg className="h-5 w-5" viewBox="0 0 24 24">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.99 10.99 0 0 0 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.1A6.6 6.6 0 0 1 5.49 12c0-.73.13-1.43.35-2.1V7.06H2.18A10.99 10.99 0 0 0 1 12c0 1.77.43 3.45 1.18 4.94l3.66-2.84z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+    />
+  </svg>
+);
+
+const PASSWORD_RULES = [
+  { label: "Minimum 6 characters", test: (pw) => pw.length >= 6 },
+  { label: "One uppercase letter", test: (pw) => /[A-Z]/.test(pw) },
+  { label: "One lowercase letter", test: (pw) => /[a-z]/.test(pw) },
+];
+
+const IMGBB_API_KEY = process.env.PUBLIC_IMGBB_API_KEY;
+
+export default function SignupPage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState("collaborator");
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const passwordValid = PASSWORD_RULES.every((rule) => rule.test(password));
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Image must be under 2MB");
+      return;
+    }
+
+    setError("");
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        { method: "POST", body: formData },
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        setPhotoUrl(data.data.url);
+      } else {
+        setError("Upload failed, try again");
+      }
+    } catch {
+      setError("Upload failed, try again");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!passwordValid) {
+      setError("Password doesn't meet the requirements");
+      return;
+    }
+    setError("");
+    // submit logic here
+  };
+
+  return (
+    <section className="flex min-h-screen flex-col items-center justify-center bg-base-200/50 px-5 py-16">
+      {/* Logo */}
+      <Link href="/" className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
+          <Rocket className="h-5 w-5" />
+        </div>
+        <span className="text-xl font-bold tracking-tight text-base-content">
+          StartupForge
+        </span>
+      </Link>
+
+      <h1 className="mt-6 text-2xl font-bold text-base-content">
+        Join StartupForge
+      </h1>
+      <p className="mt-1 text-sm text-base-content/50">
+        Create your account and start building
+      </p>
+
+      {/* Card */}
+      <div className="mt-8 w-full max-w-md rounded-3xl border border-base-200 bg-base-100 p-7 shadow-sm">
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-3 rounded-2xl border border-base-300 px-5 py-3.5 font-medium text-base-content transition hover:bg-base-200"
+        >
+          <GoogleIcon />
+          Continue with Google
+        </button>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-base-200" />
+          <span className="text-xs text-base-content/40">
+            or create with email
+          </span>
+          <div className="h-px flex-1 bg-base-200" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Full Name */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-base-content">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Alex Rivera"
+              className="w-full rounded-xl border border-base-300 bg-base-100 px-4 py-3 text-sm outline-none transition focus:border-primary"
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-base-content">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-xl border border-base-300 bg-base-100 px-4 py-3 text-sm outline-none transition focus:border-primary"
+              required
+            />
+          </div>
+
+          {/* Profile Photo */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-base-content">
+              Profile Photo
+            </label>
+            <label className="flex cursor-pointer items-center gap-3">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed border-primary/40 bg-primary/10">
+                {uploading ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                ) : photoUrl ? (
+                  <img
+                    src={photoUrl}
+                    alt="Profile"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <ArrowUpFromSquare className="h-4 w-4 text-primary" />
+                )}
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-primary">
+                  {photoUrl ? "Change photo" : "Upload photo"}
+                </span>
+                <p className="text-xs text-base-content/40">
+                  JPG or PNG, up to 2MB
+                </p>
+              </div>
+              <input
+                type="file"
+                accept="image/png, image/jpeg"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-base-content">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min. 6 characters"
+                className="w-full rounded-xl border border-base-300 bg-base-100 px-4 py-3 pr-11 text-sm outline-none transition focus:border-primary"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+              >
+                {showPassword ? (
+                  <EyeSlash className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Password rules */}
+            {password.length > 0 && (
+              <div className="flex flex-col gap-1 mt-1">
+                {PASSWORD_RULES.map((rule) => {
+                  const passed = rule.test(password);
+                  return (
+                    <div
+                      key={rule.label}
+                      className={`flex items-center gap-2 text-xs ${
+                        passed ? "text-emerald-600" : "text-base-content/40"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-3.5 w-3.5 items-center justify-center rounded-full ${
+                          passed ? "bg-emerald-100" : "bg-base-200"
+                        }`}
+                      >
+                        {passed && <Check className="h-2.5 w-2.5" />}
+                      </span>
+                      {rule.label}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Role selector */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-base-content">
+              I am a...
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole("founder")}
+                className={`flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition ${
+                  role === "founder"
+                    ? "border-primary bg-primary/5"
+                    : "border-base-300 hover:border-base-content/20"
+                }`}
+              >
+                <Rocket className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold text-base-content">
+                  Founder
+                </span>
+                <span className="text-xs text-base-content/40">
+                  I have a startup idea
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("collaborator")}
+                className={`flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition ${
+                  role === "collaborator"
+                    ? "border-primary bg-primary/5"
+                    : "border-base-300 hover:border-base-content/20"
+                }`}
+              >
+                <Persons className="h-4 w-4 text-primary" />
+                <span className="text-sm font-bold text-base-content">
+                  Collaborator
+                </span>
+                <span className="text-xs text-base-content/40">
+                  I want to join a startup
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {error && <p className="text-xs text-red-500">{error}</p>}
+
+          <button
+            type="submit"
+            className="mt-2 rounded-2xl bg-primary px-6 py-3.5 font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            Create Account
+          </button>
+        </form>
+      </div>
+
+      <p className="mt-6 text-sm text-base-content/50">
+        Already have an account?{" "}
+        <Link href="/login" className="font-semibold text-primary">
+          Sign in
+        </Link>
+      </p>
+    </section>
+  );
+}
