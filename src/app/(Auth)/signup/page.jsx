@@ -109,7 +109,7 @@ export default function SignupPage() {
         password,
         image: photoUrl,
         role,
-        callbackURL: "/",
+        callbackURL: "/signin",
       });
     } catch (err) {
       setError(err?.message || "Something went wrong. Please try again.");

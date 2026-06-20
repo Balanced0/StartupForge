@@ -1,17 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Rocket, Bars, Xmark } from "@gravity-ui/icons";
+import { useState, useRef, useEffect } from "react";
+import {
+  Rocket,
+  Bars,
+  Xmark,
+  Person,
+  ArrowRightFromSquare,
+  LayoutColumns3,
+} from "@gravity-ui/icons";
+import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Browse Startups", href: "/startups" },
     { label: "Browse Opportunities", href: "/opportunities" },
   ];
+
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    await authClient.signOut();
+    setProfileOpen(false);
+    setOpen(false);
+    window.location.href = "/";
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-base-200 bg-base-100/90 backdrop-blur">
@@ -22,7 +53,6 @@ export default function Navbar() {
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-content shadow-sm">
               <Rocket className="h-5 w-5" />
             </div>
-
             <span className="text-2xl font-bold tracking-tight">
               StartupForge
             </span>
@@ -43,19 +73,88 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-5">
-            <Link
-              href="/signin"
-              className="font-medium text-base-content/70 transition-colors hover:text-primary"
-            >
-              Login
-            </Link>
+            {!isPending && user ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-3 rounded-2xl px-2 py-1.5 transition hover:bg-base-200"
+                >
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary font-bold">
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <span className="font-medium text-base-content/80">
+                    {user.name?.split(" ")[0]}
+                  </span>
+                </button>
 
-            <Link
-              href="/register"
-              className="rounded-2xl bg-primary px-6 py-3 font-semibold text-primary-content shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              Get Started
-            </Link>
+                {/* Dropdown */}
+                <div
+                  className={`absolute right-0 mt-3 w-56 origin-top-right rounded-2xl border border-base-200 bg-base-100 p-2 shadow-lg transition-all duration-150 ${
+                    profileOpen
+                      ? "opacity-100 scale-100"
+                      : "pointer-events-none opacity-0 scale-95"
+                  }`}
+                >
+                  <div className="px-3 py-2 border-b border-base-200 mb-1">
+                    <p className="font-semibold text-sm text-base-content truncate">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-base-content/50 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content/80 transition hover:bg-base-200"
+                  >
+                    <LayoutColumns3 className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+
+                  <Link
+                    href="/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content/80 transition hover:bg-base-200"
+                  >
+                    <Person className="h-4 w-4" />
+                    Profile
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                  >
+                    <ArrowRightFromSquare className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  className="font-medium text-base-content/70 transition-colors hover:text-primary"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-2xl bg-primary px-6 py-3 font-semibold text-primary-content shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Button */}
@@ -74,7 +173,7 @@ export default function Navbar() {
         {/* Mobile Menu */}
         <div
           className={`overflow-hidden transition-all duration-300 lg:hidden ${
-            open ? "max-h-96 pb-6" : "max-h-0"
+            open ? "max-h-[28rem] pb-6" : "max-h-0"
           }`}
         >
           <div className="rounded-3xl border border-base-200 bg-base-100 p-3 shadow-lg">
@@ -92,21 +191,43 @@ export default function Navbar() {
 
               <div className="my-2 h-px bg-base-200" />
 
-              <Link
-                href="/signin"
-                onClick={() => setOpen(false)}
-                className="rounded-xl px-4 py-3 font-medium text-base-content/80 transition hover:bg-base-200"
-              >
-                Login
-              </Link>
+              {!isPending && user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-base-content/80 transition hover:bg-base-200"
+                  >
+                    <LayoutColumns3 className="h-4 w-4" />
+                    Dashboard
+                  </Link>
 
-              <Link
-                href="/register"
-                onClick={() => setOpen(false)}
-                className="mt-2 rounded-xl bg-primary px-4 py-3 text-center font-semibold text-primary-content transition hover:opacity-90"
-              >
-                Get Started
-              </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-red-500 transition hover:bg-red-50"
+                  >
+                    <ArrowRightFromSquare className="h-4 w-4" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/signin"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl px-4 py-3 font-medium text-base-content/80 transition hover:bg-base-200"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                    className="mt-2 rounded-xl bg-primary px-4 py-3 text-center font-semibold text-primary-content transition hover:opacity-90"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

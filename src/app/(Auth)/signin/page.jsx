@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Rocket, Eye, EyeSlash } from "@gravity-ui/icons";
-import { signIn } from "@/lib/auth-client"; // adjust path to match your project
+import { authClient } from "@/lib/auth-client";
 
 const GoogleIcon = () => (
   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@ export default function LoginPage() {
   const handleGoogleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signIn.social({
+      await authClient.signIn.social({
         provider: "google",
         callbackURL: "/",
       });
@@ -53,7 +53,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn.email({
+      await authClient.signIn.email({
         email,
         password,
         callbackURL: "/",
