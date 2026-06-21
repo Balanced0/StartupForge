@@ -13,6 +13,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const FUNDING_STAGES = [
   "Idea",
@@ -62,9 +63,11 @@ export default function MyStartupPage() {
   const fetchStartups = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/startups?founder_email=${user?.email}`);
+      const res = await fetch(
+        `${API_URL}/api/startups?founder_email=${user?.email}`,
+      );
       const data = await res.json();
-      setStartups(data.startups || []);
+      setStartups(data || []);
     } catch {
       setError("Failed to load startups");
     } finally {
@@ -134,7 +137,7 @@ export default function MyStartupPage() {
     if (!confirm("Delete this startup? This can't be undone.")) return;
 
     try {
-      await fetch(`/api/startups/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/startups/${id}`, { method: "DELETE" });
       setStartups((prev) => prev.filter((s) => s._id !== id));
     } catch {
       setError("Failed to delete startup");
@@ -159,23 +162,31 @@ export default function MyStartupPage() {
 
     try {
       if (editingId) {
-        const res = await fetch(`/api/startups/${editingId}`, {
+        await fetch(`${API_URL}/api/startups/${editingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
-        const updated = await res.json();
         setStartups((prev) =>
-          prev.map((s) => (s._id === editingId ? updated.startup : s)),
+          prev.map((s) =>
+            s._id === editingId ? { ...s, ...form, updatedAt: new Date() } : s,
+          ),
         );
       } else {
-        const res = await fetch("/api/startups", {
+        const res = await fetch(`${API_URL}/api/startups`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
-        const created = await res.json();
-        setStartups((prev) => [created.startup, ...prev]);
+        const result = await res.json(); // { acknowledged, insertedId }
+
+        const newStartup = {
+          ...form,
+          _id: result.insertedId,
+          status: "pending",
+          createdAt: new Date(),
+        };
+        setStartups((prev) => [newStartup, ...prev]);
       }
       resetForm();
     } catch {
