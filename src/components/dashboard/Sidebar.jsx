@@ -90,6 +90,17 @@ export default function Sidebar({ open, onClose }) {
   const user = session?.user;
 
   const navLinks = NAV_BY_ROLE[user?.role] || [];
+  const normalizedPath = pathname?.replace(/\/$/, "") || "";
+
+  // Pick the most specific (longest) matching href so that
+  // /opportunities/new doesn't also highlight /opportunities
+  const activeHref = navLinks
+    .map((l) => l.href.replace(/\/$/, ""))
+    .filter(
+      (href) =>
+        normalizedPath === href || normalizedPath.startsWith(href + "/"),
+    )
+    .sort((a, b) => b.length - a.length)[0];
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -146,11 +157,8 @@ export default function Sidebar({ open, onClose }) {
           <nav className="flex flex-col gap-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const normalizedPath = pathname?.replace(/\/$/, "") || "";
               const normalizedHref = link.href.replace(/\/$/, "");
-              const active =
-                normalizedPath === normalizedHref ||
-                normalizedPath.startsWith(normalizedHref + "/");
+              const active = normalizedHref === activeHref;
 
               return (
                 <Link
