@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   Briefcase,
   CirclePlus,
@@ -10,6 +9,8 @@ import {
   Globe,
   PersonWorker,
   Code,
+  Check,
+  CircleDollar,
 } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
@@ -26,10 +27,10 @@ const emptyForm = {
   work_type: "Remote",
   commitment_level: "Part-time",
   deadline: "",
+  compensation: "",
 };
 
 export default function AddOpportunityPage() {
-  const router = useRouter();
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
@@ -38,6 +39,12 @@ export default function AddOpportunityPage() {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState(false);
+
+  const showToast = () => {
+    setToast(true);
+    setTimeout(() => setToast(false), 3500);
+  };
 
   useEffect(() => {
     const fetchStartups = async () => {
@@ -84,6 +91,7 @@ export default function AddOpportunityPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          compensation: form.compensation ? Number(form.compensation) : null,
           required_skills: form.required_skills
             .split(",")
             .map((s) => s.trim())
@@ -93,7 +101,11 @@ export default function AddOpportunityPage() {
 
       if (!res.ok) throw new Error("Failed to create opportunity");
 
-      router.push("/dashboard/founder/opportunities");
+      setForm({
+        ...emptyForm,
+        startup_id: startups[0]?._id || "",
+      });
+      showToast();
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -103,6 +115,27 @@ export default function AddOpportunityPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Toast */}
+      <div
+        className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-5 py-4 shadow-xl transition-all duration-300 ${
+          toast
+            ? "translate-y-0 opacity-100"
+            : "translate-y-4 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
+          <Check className="h-4 w-4 text-emerald-600" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-gray-900">
+            Opportunity posted!
+          </p>
+          <p className="text-xs text-gray-500">
+            Collaborators can now apply to this role.
+          </p>
+        </div>
+      </div>
+
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-base-content">
@@ -249,21 +282,51 @@ export default function AddOpportunityPage() {
             </div>
           </div>
 
-          {/* Deadline */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-base-content">
-              Deadline
-            </label>
-            <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40" />
-              <input
-                type="date"
-                value={form.deadline}
-                onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                min={new Date().toISOString().split("T")[0]}
-                className="w-full rounded-xl border border-base-300 bg-base-100 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
-                required
-              />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Compensation */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-base-content">
+                Compensation{" "}
+                <span className="font-normal text-base-content/40">
+                  (optional)
+                </span>
+              </label>
+              <div className="relative">
+                <CircleDollar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40" />
+                <input
+                  type="number"
+                  min="0"
+                  value={form.compensation}
+                  onChange={(e) =>
+                    setForm({ ...form, compensation: e.target.value })
+                  }
+                  placeholder="e.g. 2000"
+                  className="w-full rounded-xl border border-base-300 bg-base-100 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-base-content/40">
+                  USD / mo
+                </span>
+              </div>
+            </div>
+
+            {/* Deadline */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-base-content">
+                Deadline
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/40" />
+                <input
+                  type="date"
+                  value={form.deadline}
+                  onChange={(e) =>
+                    setForm({ ...form, deadline: e.target.value })
+                  }
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full rounded-xl border border-base-300 bg-base-100 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -280,10 +343,12 @@ export default function AddOpportunityPage() {
             </button>
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={() =>
+                setForm({ ...emptyForm, startup_id: startups[0]?._id || "" })
+              }
               className="flex items-center justify-center gap-2 rounded-2xl border border-base-300 px-6 py-3.5 font-semibold text-base-content/70 transition hover:bg-base-200"
             >
-              Cancel
+              Clear
             </button>
           </div>
         </form>
