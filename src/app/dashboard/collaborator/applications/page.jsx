@@ -146,11 +146,11 @@ export default function MyApplicationsPage() {
                   {/* Applied Date */}
                   <span className="flex items-center gap-1 mt-1 text-xs text-base-content/50">
                     <Calendar className="h-3.5 w-3.5" />
-                    Applied Date: {app.createdAt ? new Date(app.createdAt).toLocaleDateString("en-US", {
+                    Applied Date: { (app.applied_at || app.createdAt) ? new Date(app.applied_at || app.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
-                    }) : "—"}
+                    }) : "—" }
                   </span>
                 </div>
 
@@ -217,13 +217,13 @@ export default function MyApplicationsPage() {
               <div>
                 <span className="text-xs text-base-content/50 block">Applied On</span>
                 <span className="font-medium">
-                  {selectedApp.createdAt ? new Date(selectedApp.createdAt).toLocaleDateString("en-US", {
+                  { (selectedApp.applied_at || selectedApp.createdAt) ? new Date(selectedApp.applied_at || selectedApp.createdAt).toLocaleDateString("en-US", {
                     month: "long",
                     day: "numeric",
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
-                  }) : "—"}
+                  }) : "—" }
                 </span>
               </div>
 
