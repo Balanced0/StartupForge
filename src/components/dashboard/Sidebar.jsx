@@ -52,7 +52,11 @@ const NAV_BY_ROLE = {
       href: "/dashboard/collaborator/overview",
       icon: LayoutColumns,
     },
-    { label: "Browse Opportunities", href: "/opportunities", icon: Magnifier },
+    {
+      label: "Browse Opportunities",
+      href: "/dashboard/collaborator/opportunities",
+      icon: Magnifier,
+    },
     {
       label: "My Applications",
       href: "/dashboard/collaborator/applications",

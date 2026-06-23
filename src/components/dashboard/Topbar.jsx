@@ -1,11 +1,88 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Bars } from "@gravity-ui/icons";
+import {
+  Bars,
+  LayoutColumns,
+  OfficeBadge,
+  CirclePlus,
+  Briefcase,
+  FileText,
+  Magnifier,
+  PersonGear,
+  Persons,
+  CircleDollar,
+} from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 
 const NAV_BY_ROLE = {
-  // ...same as before
+  founder: [
+    {
+      label: "Overview",
+      href: "/dashboard/founder/overview",
+      icon: LayoutColumns,
+    },
+    {
+      label: "My Startup",
+      href: "/dashboard/founder/startup",
+      icon: OfficeBadge,
+    },
+    {
+      label: "Add Opportunity",
+      href: "/dashboard/founder/opportunities/new",
+      icon: CirclePlus,
+    },
+    {
+      label: "Manage Opportunities",
+      href: "/dashboard/founder/opportunities",
+      icon: Briefcase,
+    },
+    {
+      label: "Applications",
+      href: "/dashboard/founder/applications",
+      icon: FileText,
+    },
+  ],
+  collaborator: [
+    {
+      label: "Overview",
+      href: "/dashboard/collaborator/overview",
+      icon: LayoutColumns,
+    },
+    {
+      label: "Browse Opportunities",
+      href: "/dashboard/collaborator/opportunities",
+      icon: Magnifier,
+    },
+    {
+      label: "My Applications",
+      href: "/dashboard/collaborator/applications",
+      icon: FileText,
+    },
+    {
+      label: "My Profile",
+      href: "/dashboard/collaborator/profile",
+      icon: PersonGear,
+    },
+  ],
+  admin: [
+    {
+      label: "Overview",
+      href: "/dashboard/admin/overview",
+      icon: LayoutColumns,
+    },
+    { label: "Manage Users", href: "/dashboard/admin/users", icon: Persons },
+    {
+      label: "Manage Startups",
+      href: "/dashboard/admin/startups",
+      icon: OfficeBadge,
+    },
+    {
+      label: "Transactions",
+      href: "/dashboard/admin/transactions",
+      icon: CircleDollar,
+    },
+  ],
 };
 
 export default function Topbar({ onMenuClick }) {
