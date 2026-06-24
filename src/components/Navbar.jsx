@@ -26,7 +26,14 @@ export default function Navbar() {
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
 
-  // Close profile dropdown on outside click
+  const getDashboardLink = (role) => {
+    if (role === "admin") return "/dashboard/admin";
+    if (role === "collaborator") return "/dashboard/collaborator";
+    return "/dashboard/founder";
+  };
+
+  const dashboardHref = getDashboardLink(user?.role);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -58,7 +65,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link
@@ -110,10 +117,15 @@ export default function Navbar() {
                     <p className="text-xs text-base-content/50 truncate">
                       {user.email}
                     </p>
+                    {user.role && (
+                      <span className="mt-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">
+                        {user.role}
+                      </span>
+                    )}
                   </div>
 
                   <Link
-                    href="/dashboard"
+                    href={dashboardHref}
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content/80 transition hover:bg-base-200"
                   >
@@ -193,13 +205,45 @@ export default function Navbar() {
 
               {!isPending && user ? (
                 <>
+                  {/* User info strip */}
+                  <div className="flex items-center gap-3 rounded-xl px-4 py-3">
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.name}
+                        className="h-9 w-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-base-content">
+                        {user.name}
+                      </p>
+                      <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">
+                        {user.role}
+                      </span>
+                    </div>
+                  </div>
+
                   <Link
-                    href="/dashboard"
+                    href={dashboardHref}
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-base-content/80 transition hover:bg-base-200"
                   >
                     <LayoutColumns3 className="h-4 w-4" />
                     Dashboard
+                  </Link>
+
+                  <Link
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-base-content/80 transition hover:bg-base-200"
+                  >
+                    <Person className="h-4 w-4" />
+                    Profile
                   </Link>
 
                   <button
