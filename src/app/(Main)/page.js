@@ -1,3 +1,4 @@
+import FeaturedOpportunities from "@/components/FeaturedOpportunities";
 import FeaturedStartups from "@/components/FeaturedStartups";
 import Hero from "@/components/Hero";
 import SuccessStories from "@/components/SuccessStories";
@@ -9,6 +10,7 @@ export default function Home() {
     <div>
       <Hero></Hero>
       <FeaturedStartups></FeaturedStartups>
+      <FeaturedOpportunities></FeaturedOpportunities>
       <SuccessStories></SuccessStories>
       <WhySection></WhySection>
     </div>
