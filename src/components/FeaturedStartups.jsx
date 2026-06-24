@@ -16,7 +16,7 @@ export default function FeaturedStartups() {
       try {
         const res = await fetch(`${API_URL}/api/startups/featured`);
         const data = await res.json();
-        setStartups(data || []);
+        setStartups((data || []).slice(0, 3));
       } catch {
         setStartups([]);
       } finally {
