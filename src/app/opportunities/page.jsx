@@ -81,7 +81,7 @@ export default function BrowseOpportunitiesPage() {
     debouncedSearch || workType !== "All" || industry !== "All";
 
   return (
-    <section className="min-h-screen bg-base-200/40 px-5 py-16">
+    <section className="min-h-screen px-5 py-16">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-10">

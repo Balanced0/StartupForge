@@ -41,11 +41,17 @@ export default function AddOpportunityPage() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState(false);
 
+  // Premium gate state
+  const [isPremium, setIsPremium] = useState(false);
+  const [oppCount, setOppCount] = useState(0);
+  const [checkingPremium, setCheckingPremium] = useState(true);
+
   const showToast = () => {
     setToast(true);
     setTimeout(() => setToast(false), 3500);
   };
 
+  // Fetch startups
   useEffect(() => {
     const fetchStartups = async () => {
       if (!user?.email) return;
@@ -68,6 +74,52 @@ export default function AddOpportunityPage() {
 
     fetchStartups();
   }, [user?.email]);
+
+  // Check premium status + opportunity count
+  useEffect(() => {
+    const checkPremium = async () => {
+      if (!user?.email) return;
+      try {
+        const [premRes, totalOpps] = await Promise.all([
+          fetch(`${API_URL}/api/payments/status/${user.email}`),
+          fetch(`${API_URL}/api/startups?founder_email=${user.email}`)
+            .then((r) => r.json())
+            .then(async (fetchedStartups) => {
+              const ids = fetchedStartups.map((s) => s._id);
+              const counts = await Promise.all(
+                ids.map((id) =>
+                  fetch(`${API_URL}/api/opportunities?startup_id=${id}`)
+                    .then((r) => r.json())
+                    .then((d) => d.length),
+                ),
+              );
+              return counts.reduce((a, b) => a + b, 0);
+            }),
+        ]);
+        const premData = await premRes.json();
+        setIsPremium(premData.isPremium);
+        setOppCount(totalOpps);
+      } catch {
+      } finally {
+        setCheckingPremium(false);
+      }
+    };
+    checkPremium();
+  }, [user?.email]);
+
+  const handleUpgrade = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/payments/create-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_email: user.email }),
+      });
+      const data = await res.json();
+      window.location.href = data.url;
+    } catch {
+      setError("Failed to start checkout. Please try again.");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,6 +157,7 @@ export default function AddOpportunityPage() {
         ...emptyForm,
         startup_id: startups[0]?._id || "",
       });
+      setOppCount((prev) => prev + 1);
       showToast();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -113,6 +166,64 @@ export default function AddOpportunityPage() {
     }
   };
 
+  // Premium check loading
+  if (checkingPremium) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  // Premium gate — show upgrade wall
+  if (!isPremium && oppCount >= 3) {
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <h2 className="text-2xl font-bold text-base-content">
+            Add Opportunity
+          </h2>
+          <p className="mt-1 text-sm text-base-content/50">
+            Post a new role for collaborators to apply to
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center gap-6 rounded-3xl border border-primary/20 bg-primary/5 p-10 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/15">
+            <CircleDollar className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-base-content">
+              Upgrade to Premium
+            </h3>
+            <p className="mt-2 max-w-sm text-sm text-base-content/60">
+              You've used your 3 free opportunity posts. Upgrade to Premium for
+              unlimited postings and more visibility.
+            </p>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-4xl font-extrabold text-base-content">
+              $49{" "}
+              <span className="text-lg font-normal text-base-content/50">
+                one-time
+              </span>
+            </p>
+            <p className="text-xs text-base-content/40">
+              Unlimited opportunities • Lifetime access
+            </p>
+          </div>
+          {error && <p className="text-xs text-red-500">{error}</p>}
+          <button
+            onClick={handleUpgrade}
+            className="flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            Upgrade Now — $49
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       {/* Toast */}
@@ -120,7 +231,7 @@ export default function AddOpportunityPage() {
         className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-5 py-4 shadow-xl transition-all duration-300 ${
           toast
             ? "translate-y-0 opacity-100"
-            : "translate-y-4 opacity-0 pointer-events-none"
+            : "pointer-events-none translate-y-4 opacity-0"
         }`}
       >
         <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
@@ -137,13 +248,19 @@ export default function AddOpportunityPage() {
       </div>
 
       {/* Header */}
-      <div>
+      <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold text-base-content">
           Add Opportunity
         </h2>
-        <p className="mt-1 text-sm text-base-content/50">
+        <p className="text-sm text-base-content/50">
           Post a new role for collaborators to apply to
         </p>
+        {/* Free post counter */}
+        {!isPremium && (
+          <p className="mt-1 text-xs font-semibold text-amber-600">
+            {3 - oppCount} free post{3 - oppCount !== 1 ? "s" : ""} remaining
+          </p>
+        )}
       </div>
 
       {/* Form card */}
@@ -301,7 +418,7 @@ export default function AddOpportunityPage() {
                     setForm({ ...form, compensation: e.target.value })
                   }
                   placeholder="e.g. 2000"
-                  className="w-full rounded-xl border border-base-300 bg-base-100 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-primary"
+                  className="w-full rounded-xl border border-base-300 bg-base-100 py-3 pl-11 pr-16 text-sm outline-none transition focus:border-primary"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-base-content/40">
                   USD / mo
