@@ -108,6 +108,7 @@ export default function AddOpportunityPage() {
   }, [user?.email]);
 
   const handleUpgrade = async () => {
+    setError("");
     try {
       const res = await fetch(`${API_URL}/api/payments/create-checkout`, {
         method: "POST",
@@ -115,6 +116,10 @@ export default function AddOpportunityPage() {
         body: JSON.stringify({ user_email: user.email }),
       });
       const data = await res.json();
+      if (!res.ok || !data.url) {
+        setError(data.message || "Failed to start checkout. Please try again.");
+        return;
+      }
       window.location.href = data.url;
     } catch {
       setError("Failed to start checkout. Please try again.");

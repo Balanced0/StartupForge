@@ -10,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const session_id = searchParams.get("session_id");
-  const [status, setStatus] = useState("loading"); // loading | success | error
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     const verify = async () => {
@@ -73,7 +73,7 @@ export default function PaymentSuccessPage() {
         </div>
 
         <h1 className="mt-6 text-2xl font-extrabold text-base-content">
-          You're now Premium! 🎉
+          You're now Premium!
         </h1>
         <p className="mt-3 text-sm text-base-content/50 leading-relaxed">
           Your payment was successful. You now have unlimited opportunity
