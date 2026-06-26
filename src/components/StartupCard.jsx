@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Persons, Briefcase, Tag } from "@gravity-ui/icons";
+import { Persons, Briefcase, Tag, Person } from "@gravity-ui/icons";
 
 export default function StartupCard({ startup }) {
   const {
@@ -8,13 +8,22 @@ export default function StartupCard({ startup }) {
     logo,
     industry,
     funding_stage,
+    founder_email,
     description,
     openings_count = 0,
     members_count = 0,
   } = startup;
 
+  // Show just the username part of the email as founder name
+  const founderDisplay = founder_email
+    ? founder_email.split("@")[0]
+    : null;
+
   return (
-    <div className="flex flex-col rounded-3xl border border-base-200 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden">
+    <Link
+      href={`/startups/${_id}`}
+      className="group flex flex-col rounded-3xl border border-base-200 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/30 overflow-hidden cursor-pointer"
+    >
       {/* Banner gradient with logo */}
       <div className="relative h-36 bg-gradient-to-br from-primary/20 via-indigo-100 to-purple-100 flex items-center justify-center">
         <div
@@ -38,10 +47,10 @@ export default function StartupCard({ startup }) {
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        {/* Name + tags */}
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        {/* Startup Name + tags */}
         <div className="flex flex-col gap-2">
-          <h3 className="text-base font-bold text-base-content">
+          <h3 className="text-base font-bold text-base-content group-hover:text-primary transition-colors">
             {startup_name}
           </h3>
           <div className="flex flex-wrap gap-1.5">
@@ -59,26 +68,37 @@ export default function StartupCard({ startup }) {
           </div>
         </div>
 
+        {/* Founder + Team Size info row */}
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-base-content/50">
+          {founderDisplay && (
+            <span className="flex items-center gap-1">
+              <Person className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="truncate max-w-[120px]">{founderDisplay}</span>
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <Briefcase className="h-3.5 w-3.5 flex-shrink-0" />
+            {openings_count} role{openings_count !== 1 ? "s" : ""} needed
+          </span>
+        </div>
+
         {/* Description */}
         <p className="text-sm leading-relaxed text-base-content/60 line-clamp-2 flex-1">
           {description}
         </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-base-200 pt-4">
-          <span className="flex items-center gap-1.5 text-sm text-base-content/50">
-            <Persons className="h-4 w-4" />
+        <div className="flex items-center justify-between border-t border-base-200 pt-3">
+          <span className="flex items-center gap-1.5 text-xs text-base-content/50">
+            <Persons className="h-3.5 w-3.5" />
             {members_count} member{members_count !== 1 ? "s" : ""}
           </span>
-          <Link
-            href={`/startups/${_id}`}
-            className="flex items-center gap-1.5 text-sm font-semibold text-primary transition hover:opacity-75"
-          >
-            <Briefcase className="h-4 w-4" />
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+            <Briefcase className="h-3.5 w-3.5" />
             {openings_count} opening{openings_count !== 1 ? "s" : ""}
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

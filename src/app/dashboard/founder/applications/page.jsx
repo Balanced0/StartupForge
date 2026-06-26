@@ -59,7 +59,6 @@ export default function FounderApplicationsPage() {
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error("Failed to update");
-      // Optimistic update
       setApplications((prev) =>
         prev.map((a) =>
           a._id?.toString() === id ? { ...a, status } : a

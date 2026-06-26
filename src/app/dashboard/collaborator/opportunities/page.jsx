@@ -356,13 +356,25 @@ export default function BrowseOpportunitiesPage() {
                     >
                       Applied
                     </button>
-                  ) : (
+                  ) : user?.role === "collaborator" ? (
                     <button
                       onClick={() => handleApplyClick(opp)}
                       className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                     >
                       Apply Now
                     </button>
+                  ) : (
+                    <div className="relative flex-1 group/btn">
+                      <button
+                        disabled
+                        className="w-full cursor-not-allowed rounded-xl bg-base-200 py-2.5 text-xs font-semibold text-base-content/40"
+                      >
+                        Apply Now
+                      </button>
+                      <div className="pointer-events-none absolute -top-10 right-0 z-10 hidden w-max max-w-[200px] rounded-xl bg-base-content px-3 py-1.5 text-center text-xs text-base-100 shadow-lg group-hover/btn:block">
+                        Only collaborators can apply
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -490,13 +502,25 @@ export default function BrowseOpportunitiesPage() {
                       >
                         Applied Successfully
                       </button>
-                    ) : (
+                    ) : user?.role === "collaborator" ? (
                       <button
                         onClick={() => handleApplyClick(selectedOpp)}
                         className="flex-1 rounded-2xl bg-primary py-3 font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
                       >
                         Apply for Role
                       </button>
+                    ) : (
+                      <div className="relative flex-1 group/btn">
+                        <button
+                          disabled
+                          className="w-full cursor-not-allowed rounded-2xl bg-base-200 py-3 font-semibold text-base-content/40"
+                        >
+                          Apply for Role
+                        </button>
+                        <div className="pointer-events-none absolute -top-10 right-0 z-10 hidden w-max max-w-[200px] rounded-xl bg-base-content px-3 py-1.5 text-center text-xs text-base-100 shadow-lg group-hover/btn:block">
+                          Only collaborators can apply
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

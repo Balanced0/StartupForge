@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Tag, Calendar, Globe, Clock, CircleDollar } from "@gravity-ui/icons";
 
-export default function OpportunityCard({ opportunity }) {
+export default function OpportunityCard({ opportunity, user }) {
   const {
     _id,
     role_title,
@@ -17,6 +17,8 @@ export default function OpportunityCard({ opportunity }) {
   const deadlineDate = deadline ? new Date(deadline) : null;
   const isExpiringSoon =
     deadlineDate && (deadlineDate - new Date()) / (1000 * 60 * 60 * 24) <= 7;
+
+  const isCollaborator = user?.role === "collaborator";
 
   return (
     <div className="flex flex-col gap-4 rounded-3xl border border-base-200 bg-base-100 p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -103,12 +105,32 @@ export default function OpportunityCard({ opportunity }) {
               })
             : "No deadline"}
         </span>
-        <Link
-          href={`/opportunities/${_id}`}
-          className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
-        >
-          Apply Now
-        </Link>
+
+        {/* Apply button — only enabled for collaborators */}
+        <div className="relative group/btn">
+          {isCollaborator ? (
+            <Link
+              href={`/opportunities/${_id}`}
+              className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+            >
+              Apply Now
+            </Link>
+          ) : (
+            <>
+              <button
+                disabled
+                className="cursor-not-allowed rounded-xl bg-base-200 px-4 py-2 text-xs font-semibold text-base-content/40"
+              >
+                Apply Now
+              </button>
+              <div className="pointer-events-none absolute -top-10 right-0 z-10 hidden w-max max-w-[200px] rounded-xl bg-base-content px-3 py-1.5 text-center text-xs text-base-100 shadow-lg group-hover/btn:block">
+                {!user
+                  ? "Sign in as a collaborator to apply"
+                  : "Only collaborators can apply"}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

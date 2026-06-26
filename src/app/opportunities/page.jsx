@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Magnifier, Xmark, Funnel, Briefcase } from "@gravity-ui/icons";
 import OpportunityCard from "@/components/OpportunityCard";
+import { authClient } from "@/lib/auth-client";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,6 +23,9 @@ const INDUSTRIES = [
 const LIMIT = 9;
 
 export default function BrowseOpportunitiesPage() {
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -208,7 +212,7 @@ export default function BrowseOpportunitiesPage() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {opportunities.map((opp) => (
-              <OpportunityCard key={opp._id} opportunity={opp} />
+              <OpportunityCard key={opp._id} opportunity={opp} user={user} />
             ))}
           </div>
         )}
