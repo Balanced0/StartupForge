@@ -45,6 +45,11 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Failed to clear Express token:", err);
+    }
     await authClient.signOut();
     setProfileOpen(false);
     setOpen(false);

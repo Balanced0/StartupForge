@@ -40,6 +40,7 @@ function ApplyModal({ opportunity, startup, user, onClose, onSuccess }) {
       const res = await fetch(`${API_URL}/api/applications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           opportunity_id: opportunity._id,
           applicant_email: user.email,
@@ -309,7 +310,7 @@ export default function StartupDetailPage() {
         const oppsData = await oppsRes.json();
         setStartup(startupData);
         setOpportunities(
-          (oppsData || []).filter((o) => o.status === "open")
+          (Array.isArray(oppsData) ? oppsData : []).filter((o) => o.status === "open")
         );
       } catch {
         setStartup(null);

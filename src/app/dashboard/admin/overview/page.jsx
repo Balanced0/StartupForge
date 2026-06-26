@@ -85,7 +85,9 @@ export default function AdminOverviewPage() {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/admin/stats`);
+        const res = await fetch(`${API_URL}/api/admin/stats`, {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Failed to fetch stats");
         setStats(await res.json());
       } catch (err) {
@@ -99,7 +101,9 @@ export default function AdminOverviewPage() {
     const fetchCharts = async () => {
       setChartsLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/admin/overview-charts`);
+        const res = await fetch(`${API_URL}/api/admin/overview-charts`, {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Failed to fetch chart data");
         setCharts(await res.json());
       } catch (err) {

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckShapeFill, Rocket } from "@gravity-ui/icons";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const session_id = searchParams.get("session_id");
   const [status, setStatus] = useState("loading");
@@ -22,6 +22,7 @@ export default function PaymentSuccessPage() {
         const res = await fetch(`${API_URL}/api/payments/verify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ session_id }),
         });
         const data = await res.json();
@@ -102,5 +103,20 @@ export default function PaymentSuccessPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-base-200/50">
+        <div className="flex flex-col items-center gap-4">
+          <span className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-base-content/50">Loading page...</p>
+        </div>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

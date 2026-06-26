@@ -21,7 +21,9 @@ export default function AdminStartupsPage() {
   const fetchStartups = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/startups`);
+      const res = await fetch(`${API_URL}/api/admin/startups`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch startups");
       const data = await res.json();
       setStartups(data || []);
@@ -44,6 +46,7 @@ export default function AdminStartupsPage() {
     try {
       const res = await fetch(`${API_URL}/api/admin/startups/${startupId}/approve`, {
         method: "POST",
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to approve startup");
       
@@ -70,6 +73,7 @@ export default function AdminStartupsPage() {
     try {
       const res = await fetch(`${API_URL}/api/admin/startups/${startupId}`, {
         method: "DELETE",
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete startup");
       

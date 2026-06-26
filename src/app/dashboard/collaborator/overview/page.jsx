@@ -28,11 +28,15 @@ export default function CollaboratorOverview() {
     const fetchData = async () => {
       if (!user?.email) return;
       try {
-        const appRes = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`);
+        const appRes = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`, {
+          credentials: "include",
+        });
         const appData = await appRes.json();
-        setApplications(appData || []);
+        setApplications(Array.isArray(appData) ? appData : []);
 
-        const userRes = await fetch(`${API_URL}/api/users/${user.email}`);
+        const userRes = await fetch(`${API_URL}/api/users/${user.email}`, {
+          credentials: "include",
+        });
         const userText = await userRes.text();
         const userData = userText ? JSON.parse(userText) : null;
         setDbUser(userData && Object.keys(userData).length > 0 ? userData : null);

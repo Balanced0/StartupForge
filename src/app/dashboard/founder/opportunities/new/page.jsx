@@ -41,7 +41,6 @@ export default function AddOpportunityPage() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState(false);
 
-  // Premium gate state
   const [isPremium, setIsPremium] = useState(false);
   const [oppCount, setOppCount] = useState(0);
   const [checkingPremium, setCheckingPremium] = useState(true);
@@ -51,7 +50,6 @@ export default function AddOpportunityPage() {
     setTimeout(() => setToast(false), 3500);
   };
 
-  // Fetch startups
   useEffect(() => {
     const fetchStartups = async () => {
       if (!user?.email) return;
@@ -59,9 +57,10 @@ export default function AddOpportunityPage() {
       try {
         const res = await fetch(
           `${API_URL}/api/startups?founder_email=${user.email}`,
+          { credentials: "include" }
         );
         const data = await res.json();
-        setStartups(data || []);
+        setStartups(Array.isArray(data) ? data : []);
         if (data?.length > 0) {
           setForm((prev) => ({ ...prev, startup_id: data[0]._id }));
         }
@@ -75,22 +74,28 @@ export default function AddOpportunityPage() {
     fetchStartups();
   }, [user?.email]);
 
-  // Check premium status + opportunity count
   useEffect(() => {
     const checkPremium = async () => {
       if (!user?.email) return;
       try {
         const [premRes, totalOpps] = await Promise.all([
-          fetch(`${API_URL}/api/payments/status/${user.email}`),
-          fetch(`${API_URL}/api/startups?founder_email=${user.email}`)
+          fetch(`${API_URL}/api/payments/status/${user.email}`, {
+            credentials: "include",
+          }),
+          fetch(`${API_URL}/api/startups?founder_email=${user.email}`, {
+            credentials: "include",
+          })
             .then((r) => r.json())
             .then(async (fetchedStartups) => {
+              if (!Array.isArray(fetchedStartups)) return 0;
               const ids = fetchedStartups.map((s) => s._id);
               const counts = await Promise.all(
                 ids.map((id) =>
-                  fetch(`${API_URL}/api/opportunities?startup_id=${id}`)
+                  fetch(`${API_URL}/api/opportunities?startup_id=${id}`, {
+                    credentials: "include",
+                  })
                     .then((r) => r.json())
-                    .then((d) => d.length),
+                    .then((d) => (Array.isArray(d) ? d.length : 0)),
                 ),
               );
               return counts.reduce((a, b) => a + b, 0);
@@ -113,6 +118,7 @@ export default function AddOpportunityPage() {
       const res = await fetch(`${API_URL}/api/payments/create-checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ user_email: user.email }),
       });
       const data = await res.json();
@@ -146,6 +152,7 @@ export default function AddOpportunityPage() {
       const res = await fetch(`${API_URL}/api/opportunities`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           ...form,
           compensation: form.compensation ? Number(form.compensation) : null,

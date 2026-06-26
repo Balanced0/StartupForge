@@ -49,18 +49,24 @@ export default function BrowseOpportunitiesPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const oppRes = await fetch(`${API_URL}/api/opportunities`);
+      const oppRes = await fetch(`${API_URL}/api/opportunities`, {
+        credentials: "include",
+      });
       const oppData = await oppRes.json();
-      setOpportunities(oppData || []);
+      setOpportunities(Array.isArray(oppData) ? oppData : []);
 
-      const startupsRes = await fetch(`${API_URL}/api/startups`);
+      const startupsRes = await fetch(`${API_URL}/api/startups`, {
+        credentials: "include",
+      });
       const startupsData = await startupsRes.json();
-      setStartups(startupsData || []);
+      setStartups(Array.isArray(startupsData) ? startupsData : []);
 
       if (user?.email) {
-        const appsRes = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`);
+        const appsRes = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`, {
+          credentials: "include",
+        });
         const appsData = await appsRes.json();
-        setMyApplications(appsData || []);
+        setMyApplications(Array.isArray(appsData) ? appsData : []);
       }
     } catch (err) {
       console.error("Error loading data:", err);
@@ -137,6 +143,7 @@ export default function BrowseOpportunitiesPage() {
       const res = await fetch(`${API_URL}/api/applications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           opportunity_id: selectedOpp._id,
           applicant_email: user.email,
@@ -154,9 +161,11 @@ export default function BrowseOpportunitiesPage() {
       showToast("Application submitted successfully!");
       setShowApplyModal(false);
       
-      const appsRes = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`);
+      const appsRes = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`, {
+        credentials: "include",
+      });
       const appsData = await appsRes.json();
-      setMyApplications(appsData || []);
+      setMyApplications(Array.isArray(appsData) ? appsData : []);
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {

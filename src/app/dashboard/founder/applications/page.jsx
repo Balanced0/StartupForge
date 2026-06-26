@@ -37,7 +37,8 @@ export default function FounderApplicationsPage() {
       setLoading(true);
       try {
         const res = await fetch(
-          `${API_URL}/api/founder/applications?founder_email=${encodeURIComponent(user.email)}`
+          `${API_URL}/api/founder/applications?founder_email=${encodeURIComponent(user.email)}`,
+          { credentials: "include" }
         );
         const data = await res.json();
         setApplications(data || []);
@@ -56,6 +57,7 @@ export default function FounderApplicationsPage() {
       const res = await fetch(`${API_URL}/api/applications/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error("Failed to update");

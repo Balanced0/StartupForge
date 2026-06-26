@@ -65,9 +65,10 @@ export default function MyStartupPage() {
     try {
       const res = await fetch(
         `${API_URL}/api/startups?founder_email=${user?.email}`,
+        { credentials: "include" }
       );
       const data = await res.json();
-      setStartups(data || []);
+      setStartups(Array.isArray(data) ? data : []);
     } catch {
       setError("Failed to load startups");
     } finally {
@@ -137,7 +138,10 @@ export default function MyStartupPage() {
     if (!confirm("Delete this startup? This can't be undone.")) return;
 
     try {
-      await fetch(`${API_URL}/api/startups/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/startups/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       setStartups((prev) => prev.filter((s) => s._id !== id));
     } catch {
       setError("Failed to delete startup");
@@ -165,6 +169,7 @@ export default function MyStartupPage() {
         await fetch(`${API_URL}/api/startups/${editingId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify(form),
         });
         setStartups((prev) =>
@@ -176,9 +181,10 @@ export default function MyStartupPage() {
         const res = await fetch(`${API_URL}/api/startups`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify(form),
         });
-        const result = await res.json(); // { acknowledged, insertedId }
+        const result = await res.json();
 
         const newStartup = {
           ...form,

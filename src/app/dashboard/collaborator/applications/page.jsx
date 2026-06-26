@@ -31,9 +31,11 @@ export default function MyApplicationsPage() {
       if (!user?.email) return;
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`);
+        const res = await fetch(`${API_URL}/api/applications?applicant_email=${user.email}`, {
+          credentials: "include",
+        });
         const data = await res.json();
-        setApplications(data || []);
+        setApplications(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load applications:", err);
       } finally {

@@ -63,9 +63,10 @@ export default function ManageOpportunitiesPage() {
       try {
         const res = await fetch(
           `${API_URL}/api/startups?founder_email=${user.email}`,
+          { credentials: "include" }
         );
         const data = await res.json();
-        setStartups(data || []);
+        setStartups(Array.isArray(data) ? data : []);
       } catch {}
     };
     fetchStartups();
@@ -78,9 +79,14 @@ export default function ManageOpportunitiesPage() {
     try {
       const startupsRes = await fetch(
         `${API_URL}/api/startups?founder_email=${user.email}`,
+        { credentials: "include" }
       );
       const startupsData = await startupsRes.json();
-      const ids = (startupsData || []).map((s) => s._id);
+      if (!Array.isArray(startupsData)) {
+        setOpportunities([]);
+        return;
+      }
+      const ids = startupsData.map((s) => s._id);
 
       if (ids.length === 0) {
         setOpportunities([]);
@@ -90,12 +96,14 @@ export default function ManageOpportunitiesPage() {
       // fetch opportunities for all startup ids
       const results = await Promise.all(
         ids.map((id) =>
-          fetch(`${API_URL}/api/opportunities?startup_id=${id}`).then((r) =>
+          fetch(`${API_URL}/api/opportunities?startup_id=${id}`, {
+            credentials: "include",
+          }).then((r) =>
             r.json(),
           ),
         ),
       );
-      setOpportunities(results.flat());
+      setOpportunities(results.filter(Array.isArray).flat());
     } catch {
       setError("Failed to load opportunities.");
     } finally {
@@ -150,6 +158,7 @@ export default function ManageOpportunitiesPage() {
       const res = await fetch(`${API_URL}/api/opportunities/${editingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           ...form,
           compensation: form.compensation ? Number(form.compensation) : null,
@@ -193,6 +202,7 @@ export default function ManageOpportunitiesPage() {
     try {
       await fetch(`${API_URL}/api/opportunities/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
       setOpportunities((prev) => prev.filter((o) => o._id !== id));
       showToast("Opportunity deleted.");

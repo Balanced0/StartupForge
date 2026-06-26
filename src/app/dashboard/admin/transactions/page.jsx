@@ -26,7 +26,9 @@ export default function AdminTransactionsPage() {
       if (!user?.email || user.role !== "admin") return;
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/admin/transactions`);
+        const res = await fetch(`${API_URL}/api/admin/transactions`, {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Failed to fetch transactions");
         const data = await res.json();
         setTransactions(data || []);

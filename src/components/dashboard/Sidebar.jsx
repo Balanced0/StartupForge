@@ -96,8 +96,6 @@ export default function Sidebar({ open, onClose }) {
   const navLinks = NAV_BY_ROLE[user?.role] || [];
   const normalizedPath = pathname?.replace(/\/$/, "") || "";
 
-  // Pick the most specific (longest) matching href so that
-  // /opportunities/new doesn't also highlight /opportunities
   const activeHref = navLinks
     .map((l) => l.href.replace(/\/$/, ""))
     .filter(
@@ -107,6 +105,11 @@ export default function Sidebar({ open, onClose }) {
     .sort((a, b) => b.length - a.length)[0];
 
   const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Failed to clear Express token:", err);
+    }
     await authClient.signOut();
     window.location.href = "/";
   };

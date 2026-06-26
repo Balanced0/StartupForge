@@ -40,7 +40,9 @@ export default function CollaboratorProfilePage() {
       if (!user?.email) return;
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/users/${user.email}`);
+        const res = await fetch(`${API_URL}/api/users/${user.email}`, {
+          credentials: "include",
+        });
         const text = await res.text();
         const data = text ? JSON.parse(text) : null;
         
@@ -143,6 +145,7 @@ export default function CollaboratorProfilePage() {
       const res = await fetch(`${API_URL}/api/users/${user.email}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(profile),
       });
 

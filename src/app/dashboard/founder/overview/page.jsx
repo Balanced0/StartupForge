@@ -128,7 +128,8 @@ export default function FounderOverviewPage() {
       setLoading(true);
       try {
         const res = await fetch(
-          `${API_URL}/api/founder/overview?founder_email=${encodeURIComponent(user.email)}`
+          `${API_URL}/api/founder/overview?founder_email=${encodeURIComponent(user.email)}`,
+          { credentials: "include" }
         );
         if (!res.ok) throw new Error("Failed to fetch overview");
         const json = await res.json();

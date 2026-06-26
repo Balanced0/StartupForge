@@ -26,7 +26,9 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/admin/users`);
+      const res = await fetch(`${API_URL}/api/admin/users`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch users");
       const data = await res.json();
       setUsers(data || []);
@@ -51,7 +53,7 @@ export default function AdminUsersPage() {
     setActionLoading(targetUser.email);
     try {
       const endpoint = `${API_URL}/api/admin/users/${targetUser.email}/${actionText}`;
-      const res = await fetch(endpoint, { method: "POST" });
+      const res = await fetch(endpoint, { method: "POST", credentials: "include" });
       if (!res.ok) throw new Error(`Failed to ${actionText} user`);
       setUsers((prev) =>
         prev.map((u) =>
