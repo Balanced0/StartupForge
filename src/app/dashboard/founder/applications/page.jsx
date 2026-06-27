@@ -40,10 +40,12 @@ export default function FounderApplicationsPage() {
           `${API_URL}/api/founder/applications?founder_email=${encodeURIComponent(user.email)}`,
           { credentials: "include" }
         );
+        if (!res.ok) throw new Error("Failed to fetch applications");
         const data = await res.json();
-        setApplications(data || []);
+        setApplications(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load applications:", err);
+        setApplications([]);
       } finally {
         setLoading(false);
       }
