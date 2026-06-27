@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Rocket, Suitcase, ArrowRight } from "@gravity-ui/icons";
+import { authClient } from "@/lib/auth-client";
 
 const stats = [
   { value: "2,400+", label: "Active Startups" },
@@ -9,6 +12,9 @@ const stats = [
 ];
 
 export default function Hero() {
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+  const isFounder = user?.role === "founder";
   return (
     <section className="relative overflow-hidden bg-[#07070d]">
       {/* Big glows */}
@@ -64,13 +70,36 @@ export default function Hero() {
             Browse Opportunities
           </Link>
 
-          <Link
-            href="/post"
-            className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary hover:text-primary"
-          >
-            Post Your Startup
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+          {!user ? (
+            <Link
+              href="/signin?callback=/dashboard/founder/startup"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary hover:text-primary"
+            >
+              Post Your Startup
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          ) : isFounder ? (
+            <Link
+              href="/dashboard/founder/startup"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary hover:text-primary"
+            >
+              Post Your Startup
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          ) : (
+            <div className="relative group/btn">
+              <button
+                disabled
+                className="cursor-not-allowed flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-semibold text-white/40 backdrop-blur-sm"
+              >
+                Post Your Startup
+                <ArrowRight className="h-5 w-5 opacity-40" />
+              </button>
+              <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 z-10 hidden w-max max-w-[250px] rounded-xl bg-base-content px-3 py-1.5 text-center text-xs text-base-100 shadow-lg group-hover/btn:block">
+                Only founders can post startups
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stats */}

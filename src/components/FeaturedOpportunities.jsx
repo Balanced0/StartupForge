@@ -4,10 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "@gravity-ui/icons";
 import OpportunityCard from "./OpportunityCard";
+import { authClient } from "@/lib/auth-client";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function FeaturedOpportunities() {
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,7 +69,7 @@ export default function FeaturedOpportunities() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {opportunities.map((opp) => (
-              <OpportunityCard key={opp._id} opportunity={opp} />
+              <OpportunityCard key={opp._id} opportunity={opp} user={user} />
             ))}
           </div>
         )}

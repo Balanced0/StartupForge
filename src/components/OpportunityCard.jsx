@@ -4,6 +4,7 @@ import { Tag, Calendar, Globe, Clock, CircleDollar } from "@gravity-ui/icons";
 export default function OpportunityCard({ opportunity, user }) {
   const {
     _id,
+    startup_id,
     role_title,
     startup_name,
     startup_logo,
@@ -110,7 +111,7 @@ export default function OpportunityCard({ opportunity, user }) {
         <div className="relative group/btn">
           {isCollaborator ? (
             <Link
-              href={`/opportunities/${_id}`}
+              href={`/startups/${startup_id}?apply=${_id}`}
               className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
             >
               Apply Now

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -288,6 +288,9 @@ function PositionCard({ opportunity, startup, user, onApply }) {
 
 export default function StartupDetailPage() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
+  const applyId = searchParams.get("apply");
+
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
@@ -296,6 +299,16 @@ export default function StartupDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOpp, setSelectedOpp] = useState(null);
   const [toast, setToast] = useState(null);
+
+  // Automatically open ApplyModal if ?apply=opportunity_id is in search params
+  useEffect(() => {
+    if (applyId && opportunities.length > 0) {
+      const opp = opportunities.find((o) => o._id === applyId);
+      if (opp) {
+        setSelectedOpp(opp);
+      }
+    }
+  }, [applyId, opportunities]);
 
   useEffect(() => {
     if (!id) return;
