@@ -31,7 +31,7 @@ const emptyForm = {
 };
 
 export default function AddOpportunityPage() {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: sessionPending } = authClient.useSession();
   const user = session?.user;
 
   const [startups, setStartups] = useState([]);
@@ -52,7 +52,7 @@ export default function AddOpportunityPage() {
 
   useEffect(() => {
     const fetchStartups = async () => {
-      if (!user?.email) return;
+      if (sessionPending || !user?.email) return;
       setLoadingStartups(true);
       try {
         const res = await fetch(
@@ -72,45 +72,61 @@ export default function AddOpportunityPage() {
     };
 
     fetchStartups();
-  }, [user?.email]);
+  }, [user?.email, sessionPending]);
 
   useEffect(() => {
+    // Don't run until the session has fully resolved — avoids showing wrong counts
+    // while the session is still loading and user is undefined.
+    if (sessionPending) return;
+
     const checkPremium = async () => {
-      if (!user?.email) return;
+      if (!user?.email) {
+        // Session loaded but no user — not logged in, dismiss spinner
+        setCheckingPremium(false);
+        return;
+      }
       try {
-        const [premRes, totalOpps] = await Promise.all([
+        const [premRes, startupRes] = await Promise.all([
           fetch(`${API_URL}/api/payments/status/${user.email}`, {
             credentials: "include",
           }),
           fetch(`${API_URL}/api/startups?founder_email=${user.email}`, {
             credentials: "include",
-          })
-            .then((r) => r.json())
-            .then(async (fetchedStartups) => {
-              if (!Array.isArray(fetchedStartups)) return 0;
-              const ids = fetchedStartups.map((s) => s._id);
-              const counts = await Promise.all(
-                ids.map((id) =>
-                  fetch(`${API_URL}/api/opportunities?startup_id=${id}`, {
-                    credentials: "include",
-                  })
-                    .then((r) => r.json())
-                    .then((d) => (Array.isArray(d) ? d.length : 0)),
-                ),
-              );
-              return counts.reduce((a, b) => a + b, 0);
-            }),
+          }),
         ]);
-        const premData = await premRes.json();
-        setIsPremium(premData.isPremium);
+
+        // Only set premium status if the request actually succeeded
+        if (premRes.ok) {
+          const premData = await premRes.json();
+          setIsPremium(premData.isPremium === true);
+        }
+
+        // Count total opportunities across all startups
+        let totalOpps = 0;
+        if (startupRes.ok) {
+          const fetchedStartups = await startupRes.json();
+          if (Array.isArray(fetchedStartups) && fetchedStartups.length > 0) {
+            const counts = await Promise.all(
+              fetchedStartups.map((s) =>
+                fetch(`${API_URL}/api/opportunities?startup_id=${s._id}`, {
+                  credentials: "include",
+                })
+                  .then((r) => (r.ok ? r.json() : []))
+                  .then((d) => (Array.isArray(d) ? d.length : 0))
+              )
+            );
+            totalOpps = counts.reduce((a, b) => a + b, 0);
+          }
+        }
         setOppCount(totalOpps);
-      } catch {
+      } catch (err) {
+        console.error("[checkPremium] Failed:", err);
       } finally {
         setCheckingPremium(false);
       }
     };
     checkPremium();
-  }, [user?.email]);
+  }, [user?.email, sessionPending]);
 
   const handleUpgrade = async () => {
     setError("");
