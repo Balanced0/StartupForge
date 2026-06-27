@@ -1,21 +1,18 @@
-const EXPRESS_URL = process.env.NEXT_PUBLIC_API_URL;
+import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
-    const expressRes = await fetch(`${EXPRESS_URL}/api/auth/logout`, {
-      method: "POST",
+    const response = NextResponse.json({ success: true });
+    response.cookies.set("sf_token", "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 0,
+      path: "/",
     });
-
-    const setCookie = expressRes.headers.get("set-cookie");
-    const response = Response.json({ success: true });
-
-    if (setCookie) {
-      response.headers.set("set-cookie", setCookie);
-    }
-
     return response;
   } catch (err) {
     console.error("[/api/auth/logout]", err);
-    return Response.json({ message: "Internal error" }, { status: 500 });
+    return NextResponse.json({ message: "Internal error" }, { status: 500 });
   }
 }
