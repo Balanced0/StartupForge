@@ -18,6 +18,8 @@ import {
 } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 
+const EXPRESS_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const NAV_BY_ROLE = {
   founder: [
     {
@@ -106,7 +108,10 @@ export default function Sidebar({ open, onClose }) {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch(`${EXPRESS_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
     } catch (err) {
       console.error("Failed to clear Express token:", err);
     }

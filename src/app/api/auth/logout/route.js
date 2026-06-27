@@ -1,18 +1,8 @@
 import { NextResponse } from "next/server";
 
+// The Next.js logout route is a no-op for the sf_token cookie since
+// that cookie now lives on the Express domain (cleared by the client directly).
+// This route exists so Navbar/Sidebar can call it as part of their logout flow.
 export async function POST() {
-  try {
-    const response = NextResponse.json({ success: true });
-    response.cookies.set("sf_token", "", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 0,
-      path: "/",
-    });
-    return response;
-  } catch (err) {
-    console.error("[/api/auth/logout]", err);
-    return NextResponse.json({ message: "Internal error" }, { status: 500 });
-  }
+  return NextResponse.json({ success: true });
 }

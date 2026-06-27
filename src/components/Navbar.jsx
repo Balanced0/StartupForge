@@ -12,6 +12,8 @@ import {
 } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 
+const EXPRESS_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -45,8 +47,12 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
+    // Clear sf_token directly on the Express domain
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch(`${EXPRESS_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
     } catch (err) {
       console.error("Failed to clear Express token:", err);
     }
