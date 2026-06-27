@@ -119,11 +119,11 @@ export default function BrowseOpportunitiesPage() {
           </div>
 
           {/* Work Type */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={workType}
               onChange={(e) => setWorkType(e.target.value)}
-              className={`appearance-none cursor-pointer rounded-2xl border py-3.5 pl-4 pr-9 text-sm font-medium shadow-sm outline-none transition ${
+              className={`w-full sm:w-auto appearance-none cursor-pointer rounded-2xl border py-3.5 pl-4 pr-9 text-sm font-medium shadow-sm outline-none transition ${
                 workType !== "All"
                   ? "border-primary bg-primary/5 text-primary"
                   : "border-base-300 bg-base-100 text-base-content/70"
@@ -139,11 +139,11 @@ export default function BrowseOpportunitiesPage() {
           </div>
 
           {/* Industry */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={industry}
               onChange={(e) => setIndustry(e.target.value)}
-              className={`appearance-none cursor-pointer rounded-2xl border py-3.5 pl-4 pr-9 text-sm font-medium shadow-sm outline-none transition ${
+              className={`w-full sm:w-auto appearance-none cursor-pointer rounded-2xl border py-3.5 pl-4 pr-9 text-sm font-medium shadow-sm outline-none transition ${
                 industry !== "All"
                   ? "border-primary bg-primary/5 text-primary"
                   : "border-base-300 bg-base-100 text-base-content/70"
@@ -161,7 +161,7 @@ export default function BrowseOpportunitiesPage() {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 rounded-2xl border border-base-300 px-4 py-3.5 text-sm font-semibold text-base-content/60 transition hover:border-red-300 hover:text-red-500"
+              className="flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-2xl border border-base-300 px-4 py-3.5 text-sm font-semibold text-base-content/60 transition hover:border-red-300 hover:text-red-500"
             >
               <Xmark className="h-4 w-4" />
               Clear

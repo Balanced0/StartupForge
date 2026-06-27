@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Rocket,
   Persons,
@@ -42,6 +43,7 @@ const PASSWORD_RULES = [
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 export default function SignupPage() {
+  const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +53,7 @@ export default function SignupPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const passwordValid = PASSWORD_RULES.every((rule) => rule.test(password));
 
@@ -103,14 +106,23 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      await authClient.signUp.email({
+      const res = await authClient.signUp.email({
         name: fullName,
         email,
         password,
         image: photoUrl,
         role,
-        callbackURL: "/signin",
       });
+
+      if (res?.error) {
+        setError(res.error.message || "Something went wrong. Please try again.");
+      } else {
+        setShowToast(true);
+        setTimeout(() => {
+          setShowToast(false);
+          router.push("/signin");
+        }, 2000);
+      }
     } catch (err) {
       setError(err?.message || "Something went wrong. Please try again.");
     } finally {
@@ -134,6 +146,27 @@ export default function SignupPage() {
 
   return (
     <section className="flex min-h-screen flex-col items-center justify-center bg-base-200/50 px-5 py-16">
+      {/* Toast */}
+      <div
+        className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-5 py-4 shadow-xl transition-all duration-300 ${
+          showToast
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-4 opacity-0"
+        }`}
+      >
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
+          <Check className="h-4 w-4 text-emerald-600" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-gray-900">
+            Account created successfully!
+          </p>
+          <p className="text-xs text-gray-500">
+            Redirecting to sign in...
+          </p>
+        </div>
+      </div>
+
       {/* Logo */}
       <Link href="/" className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-sm">
@@ -348,7 +381,7 @@ export default function SignupPage() {
 
       <p className="mt-6 text-sm text-base-content/50">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-primary">
+        <Link href="/signin" className="font-semibold text-primary">
           Sign in
         </Link>
       </p>
